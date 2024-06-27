@@ -1,0 +1,8 @@
+{
+    "endpoint" : "https://pstestopenaidply-zylgerfvhxdfi.openai.azure.com/",
+    "deployment_name": "pstestopenaidply-y377hh3qrrryi",
+    "location" : "southcentralus",
+    "model_name": "gpt-35-turbo",
+    "api_key": "d52a0d4b4fc24e50bc3041d16c2cd1a5",
+    "api_version": "2023-06-01"
+}
