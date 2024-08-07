@@ -26,7 +26,7 @@
 
 #     import requests
 #     API_URL = "https://api-inference.huggingface.co/models/gpt2"
-#     API_TOKEN = ""
+#     API_TOKEN = "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"
 #     headers = {"Authorization": f"Bearer {API_TOKEN}"}
 #     def query(payload):
 #         response = requests.post(API_URL, headers=headers, json=payload)
@@ -64,7 +64,7 @@
 
 # url = "https://api-inference.huggingface.co/models/nisten/Biggie-SmoLlm-0.15B-Base"
 # # url = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-8B-Instruct/v1/chat/completions"
-# token = ""
+# token = "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"
 
 # prompt = "What is the captial of india"
 # headers = {"Authorization": f"Bearer {token}"}
@@ -79,7 +79,7 @@
 import requests
 
 API_URL = "https://api-inference.huggingface.co/models/HuggingFaceTB/SmolLM-135M"
-headers = {"Authorization": "Bearer "}
+headers = {"Authorization": "Bearer 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"}
 
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
