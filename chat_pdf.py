@@ -55,7 +55,7 @@ def indexing(chunks, embedding_model, pdf_files_list, vector_store_db):
     vectorstore.save_local()
 
 def chain_retrival_system(retriver, prompt, query):
-    chain = RetrievalQA.from_chain_type(llm=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ"),
+    chain = RetrievalQA.from_chain_type(llm=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key=""),
                                        retriever=retriver , chain_type="stuff", chain_type_kwargs={"prompt":prompt})
     response = chain({"query": query})
     print("response", response)
@@ -91,7 +91,7 @@ def main():
                     f.write(file.read())
         
         submit = st.button("Submit")
-        embedding_model = GoogleGenerativeAIEmbeddings(model = "models/embedding-001", google_api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ")
+        embedding_model = GoogleGenerativeAIEmbeddings(model = "models/embedding-001", google_api_key="")
         if submit and uploaded_files != None:
             with st.spinner("Processing....."):
                 for i, pdf_file in enumerate(file_names):
