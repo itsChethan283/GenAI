@@ -1,4 +1,5 @@
 Chat with the uploaded pdf file
 
-[a relative link](chat_pdf.py)
+[App code](chat_pdf.py)
 
+![Screenshots](https://github.com/itsChethan283/GenAI/blob/pdf_chat_app/Screen%20shots/chat%20pdf.png)
