@@ -6,12 +6,24 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from streamlit_pdf_viewer import pdf_viewer
 
 st.set_page_config(page_title="Chat PDF", page_icon="📕")
-st.title("Chat Bot Validator")
+st.title("Chat with your PDF")
+
+
+if "successs_messages" not in st.session_state:
+    st.session_state.success_messages = False
+
+if st.session_state.success_messages:
+    st.success("Done processing!")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+    
+
+if "binary_val" not in st.session_state:
+    st.session_state.binary_val= []
 
 for message in st.session_state.messages:
     if message["type"] == "question":
@@ -22,7 +34,7 @@ for message in st.session_state.messages:
                     display: inline-block; 
                     border-radius: 10px;
                     padding: 5px 15px 5px 15px; 
-                    text-align: right">{message["content"]}</p>''', unsafe_allow_html=True)
+                    text-align: left">{message["content"]}</p>''', unsafe_allow_html=True)
     if message["type"] == "answer":
         st.markdown(f'''<p style="color: #000000; 
                     position: relative;
@@ -32,7 +44,7 @@ for message in st.session_state.messages:
                     display: inline-block; 
                     border-radius: 10px;
                     padding: 5px 15px 5px 15px; 
-                    text-align: right">{message["content"]}</p>''', unsafe_allow_html=True)
+                    text-align: left">{message["content"]}</p>''', unsafe_allow_html=True)
         
 
 def get_pdf_text(pdf_path):
@@ -55,7 +67,7 @@ def indexing(chunks, embedding_model, pdf_files_list, vector_store_db):
     vectorstore.save_local()
 
 def chain_retrival_system(retriver, prompt, query):
-    chain = RetrievalQA.from_chain_type(llm=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key=""),
+    chain = RetrievalQA.from_chain_type(llm=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ"),
                                        retriever=retriver , chain_type="stuff", chain_type_kwargs={"prompt":prompt})
     response = chain({"query": query})
     print("response", response)
@@ -79,32 +91,42 @@ def main():
     pdf_files_folder = "M:/Chethan/GenAI/GenAI/GenAI/pdf_files/"
     uploaded_files = None
     file_names = []
+
     with st.sidebar:
         st.title("Chat PDF")
-        uploaded_files = st.file_uploader("Upload the PDF file", type="pdf", accept_multiple_files=True)
+        uploaded_files = st.file_uploader("Upload your files", type="pdf", accept_multiple_files=True)
         if uploaded_files != None:
             if not os.path.exists(pdf_files_folder):
                 os.makedirs(pdf_files_folder) 
             for file in uploaded_files:
+                bin = file.getvalue()
+                st.session_state.binary_val.append(bin)
                 file_names.append(file.name)
                 with open(os.path.join(pdf_files_folder, file.name), "wb") as f:
                     f.write(file.read())
-        
+
+
         submit = st.button("Submit")
-        embedding_model = GoogleGenerativeAIEmbeddings(model = "models/embedding-001", google_api_key="")
+        embedding_model = GoogleGenerativeAIEmbeddings(model = "models/embedding-001", google_api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ")
         if submit and uploaded_files != None:
-            with st.spinner("Processing....."):
+            with st.status("Processing.....", expanded=True) as status:
                 for i, pdf_file in enumerate(file_names):
                     pdf_file = "pdf_files" + "/" + pdf_file
                     text = get_pdf_text(pdf_file)
+                    st.write("Text Extracted")
                     chunks = get_chunks(text)
+                    st.write("Chunked")
                     if i == 0:
                         vectorstore = FAISS.from_texts(chunks, embedding_model)
                     else:
                         vec_i = FAISS.from_texts(chunks, embedding_model)
                         vectorstore.merge_from(vec_i)   
                     vectorstore.save_local("vec_store_")
+                    st.write("Embedded and Indexed")
+                    status.update(label="Processing Done!", state="complete", expanded=False)
+            st.session_state.success_messages = True
 
+        
     user_ques = st.chat_input("Ask any question")
     if user_ques != None:
         res = chatting(user_ques, embedding_model, vector_store_db)
@@ -116,7 +138,7 @@ def main():
                     display: inline-block; 
                     border-radius: 10px;
                     padding: 5px 15px 5px 15px; 
-                    text-align: right">{user_ques}</p>''', unsafe_allow_html=True)
+                    text-align: left">{user_ques}</p>''', unsafe_allow_html=True)
         st.session_state.messages.append({"type": "question", "content":user_ques})
         st.markdown(f'''<p style="position: relative; 
                     background-color: #e0eee1; 
@@ -128,7 +150,6 @@ def main():
                     padding: 5px 15px 5px 15px; 
                     text-align: left">{res}</p>''', unsafe_allow_html=True)
         st.session_state.messages.append({"type": "answer", "content":res})
-
 
 
 if __name__ == "__main__":
