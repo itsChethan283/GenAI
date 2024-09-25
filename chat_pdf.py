@@ -1,6 +1,6 @@
 import streamlit as st
 import os 
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.chains.retrieval_qa.base import RetrievalQA
