@@ -3,10 +3,13 @@ import os
 from pypdf import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from langchain_core.vectorstores import VectorStoreRetriever
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from streamlit_pdf_viewer import pdf_viewer
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
 
 st.set_page_config(page_title="Chat PDF", page_icon="📕")
 st.title("Chat with your PDF")
@@ -67,9 +70,13 @@ def indexing(chunks, embedding_model, pdf_files_list, vector_store_db):
     vectorstore.save_local()
 
 def chain_retrival_system(retriver, prompt, query):
-    chain = RetrievalQA.from_chain_type(llm=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ"),
-                                       retriever=retriver , chain_type="stuff", chain_type_kwargs={"prompt":prompt})
-    response = chain({"query": query})
+    llm = ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ")
+    combine_docs_chain = create_stuff_documents_chain(llm, prompt)
+    chain = create_retrieval_chain(retriver, combine_docs_chain)
+    # chain = RetrievalQA.from_chain_type(llm=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ"),
+    #                                    retriever=retriver , chain_type="stuff", chain_type_kwargs={"prompt":prompt})
+    # response = chain({"query": query})
+    response = chain.invoke({"input": query})
     # print("response", response)
     return response
 
@@ -77,7 +84,8 @@ def chatting(question, embedding_model, vector_store_db):
     with st.spinner("Processiong....."):
         vectorstore = FAISS.load_local(vector_store_db, embedding_model, allow_dangerous_deserialization=True)
         relavent_chunks = vectorstore.similarity_search(question)
-        retriver = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
+        # retriver = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
+        retriver = VectorStoreRetriever(vectorstore=vectorstore)
         prompt_template = """
         You are an AI assistant specialised in analysing and providing answers based on the specific PDF documents. 
         Be professional with the answers and ensure that all the derieved information is referenced from the document.
@@ -85,12 +93,16 @@ def chatting(question, embedding_model, vector_store_db):
         If there are any abusive words, donot answer instead make a polite statement that the information is offensive and to change the approach of asking questions. 
         The provided context is given below, only use this for your reference.
                 Context: {context}
-                Question: {question}
+                Question: {input}
+        ---------------------------------------------------
+        If the context is not there or is empty, just say that 
+        "There is no relevant information for the question asked or
+        Please upload a file and ask the questions"
         """
         prompt = PromptTemplate.from_template(prompt_template)
         response = chain_retrival_system(retriver, prompt, question)
         # print(response["result"])
-        return response["result"]
+        return response["answer"]
 
 def main():
     vector_store_db= "vec_store_"
@@ -137,8 +149,9 @@ def main():
     if user_ques != None:
         res = chatting(user_ques, embedding_model, vector_store_db)
         ress = res.split("\n")
-        print(ress)
-        print("length", len(ress))
+        response_change = ""
+        for response in ress:
+            response_change = response_change + response + "<BR>"  
         st.markdown(f'''<p style="color: #000000; 
                     position: absolute; 
                     right: 0px;  
@@ -149,18 +162,18 @@ def main():
                     padding: 5px 15px 5px 15px; 
                     text-align: left">{user_ques}</p>''', unsafe_allow_html=True)
         st.session_state.messages.append({"type": "question", "content":user_ques})
-        for response in ress:
-            if response != "":
-                st.markdown(f'''<p style="position: relative; 
-                            background-color: #e0eee1; 
-                            margin-top: 5%;
-                            margin-bottom: 5%;
-                            color: #0f1116; 
-                            display: inline-block; 
-                            border-radius: 10px; 
-                            padding: 5px 15px 5px 15px; 
-                            text-align: left">{response}</p>''', unsafe_allow_html=True)
-                st.session_state.messages.append({"type": "answer", "content":response})
+        # for response in ress:
+        #     if response != "":
+        st.markdown(f'''<p style="position: relative; 
+                    background-color: #e0eee1; 
+                    margin-top: 5%;
+                    margin-bottom: 5%;
+                    color: #0f1116; 
+                    display: inline-block; 
+                    border-radius: 10px; 
+                    padding: 5px 15px 5px 15px; 
+                    text-align: left">{response_change}</p>''', unsafe_allow_html=True)
+        st.session_state.messages.append({"type": "answer", "content":response_change})
 
 
 if __name__ == "__main__":
