@@ -1,0 +1,4 @@
+pypdf
+langchain
+langchain_google_genai 
+streamlit_pdf_viewer 
