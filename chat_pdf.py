@@ -93,8 +93,8 @@ def chatting(question, embedding_model, vector_store_db):
         return response["result"]
 
 def main():
-    vector_store_db= "M:/Chethan/GenAI/GenAI/GenAI/vec_store_"
-    pdf_files_folder = "M:/Chethan/GenAI/GenAI/GenAI/pdf_files/"
+    vector_store_db= "vec_store_"
+    pdf_files_folder = "pdf_files"
     uploaded_files = None
     file_names = []
 
@@ -127,7 +127,7 @@ def main():
                     else:
                         vec_i = FAISS.from_texts(chunks, embedding_model)
                         vectorstore.merge_from(vec_i)   
-                    vectorstore.save_local("vec_store_")
+                    vectorstore.save_local(vector_store_db)
                     st.write("Embedded and Indexed")
                     status.update(label="Processing Done!", state="complete", expanded=False)
             st.session_state.success_messages = True
