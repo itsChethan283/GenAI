@@ -131,16 +131,16 @@ def main():
                 for i, pdf_file in enumerate(file_names):
                     pdf_file = "pdf_files" + "/" + pdf_file
                     text = get_pdf_text(pdf_file)
-                    st.write("Text Extracted")
+                    st.write(f"{pdf_file} Text Extracted")
                     chunks = get_chunks(text)
-                    st.write("Chunked")
+                    st.write(f"{pdf_file} Chunked")
                     if i == 0:
                         vectorstore = FAISS.from_texts(chunks, embedding_model)
                     else:
                         vec_i = FAISS.from_texts(chunks, embedding_model)
                         vectorstore.merge_from(vec_i)   
                     vectorstore.save_local(vector_store_db)
-                    st.write("Embedded and Indexed")
+                    st.write(f"{pdf_file} Embedded and Indexed")
                     status.update(label="Processing Done!", state="complete", expanded=False)
             st.session_state.success_messages = True
 
