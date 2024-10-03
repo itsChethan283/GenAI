@@ -4,3 +4,4 @@ langchain_google_genai
 streamlit_pdf_viewer 
 langchain-community
 faiss-cpu
+pycryptodome
