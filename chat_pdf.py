@@ -95,7 +95,7 @@ def chatting(question, embedding_model, vector_store_db):
                 Context: {context}
                 Question: {input}
         ---------------------------------------------------
-        If the context is not there or is empty, just say that 
+        If the context is not there or is empty, try to answer in general if the question is not particular and is general and does not force you to only answer from context, or just say that 
         "There is no relevant information for the question asked or
         Please upload a file and ask the questions"
         """
