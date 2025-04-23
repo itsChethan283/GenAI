@@ -10,6 +10,9 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
+from dotenv import load_dotenv
+
+load_dotenv()
 
 st.set_page_config(page_title="Chat PDF", page_icon="📕")
 st.title("Chat with your PDF")
@@ -70,7 +73,7 @@ def indexing(chunks, embedding_model, pdf_files_list, vector_store_db):
     vectorstore.save_local()
 
 def chain_retrival_system(retriver, prompt, query):
-    llm = ChatGoogleGenerativeAI(model="gemini/gemini-1.5-flash",temperature=0.3, api_key="AIzaSyCOesQ-6_nLahzHuAB-UbO_3uU313D0TEA")
+    llm = ChatGoogleGenerativeAI(model=os.getenv("llmmodel"),temperature=0.3, api_key=os.getenv("g_api"))
     combine_docs_chain = create_stuff_documents_chain(llm, prompt)
     chain = create_retrieval_chain(retriver, combine_docs_chain)
     response = chain.invoke({"input": query})
@@ -122,7 +125,7 @@ def main():
 
 
         submit = st.button("Submit")
-        embedding_model = GoogleGenerativeAIEmbeddings(model = "models/embedding-001", google_api_key="AIzaSyCOesQ-6_nLahzHuAB-UbO_3uU313D0TEA")
+        embedding_model = GoogleGenerativeAIEmbeddings(model=os.getenv("embeddingmodel"), google_api_key=os.getenv("g_api"))
         if submit and uploaded_files != None:
             with st.status("Processing.....", expanded=True) as status:
                 for i, pdf_file in enumerate(file_names):
