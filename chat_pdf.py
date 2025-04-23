@@ -70,12 +70,9 @@ def indexing(chunks, embedding_model, pdf_files_list, vector_store_db):
     vectorstore.save_local()
 
 def chain_retrival_system(retriver, prompt, query):
-    llm = ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ")
+    llm = ChatGoogleGenerativeAI(model="gemini/gemini-1.5-flash",temperature=0.3, api_key="AIzaSyCOesQ-6_nLahzHuAB-UbO_3uU313D0TEA")
     combine_docs_chain = create_stuff_documents_chain(llm, prompt)
     chain = create_retrieval_chain(retriver, combine_docs_chain)
-    # chain = RetrievalQA.from_chain_type(llm=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3, api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ"),
-    #                                    retriever=retriver , chain_type="stuff", chain_type_kwargs={"prompt":prompt})
-    # response = chain({"query": query})
     response = chain.invoke({"input": query})
     # print("response", response)
     return response
