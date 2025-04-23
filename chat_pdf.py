@@ -122,7 +122,7 @@ def main():
 
 
         submit = st.button("Submit")
-        embedding_model = GoogleGenerativeAIEmbeddings(model = "models/embedding-001", google_api_key="AIzaSyCH-FPn68zYhVAeYfepmxt-W5O6iWMrfDQ")
+        embedding_model = GoogleGenerativeAIEmbeddings(model = "models/embedding-001", google_api_key="AIzaSyCOesQ-6_nLahzHuAB-UbO_3uU313D0TEA")
         if submit and uploaded_files != None:
             with st.status("Processing.....", expanded=True) as status:
                 for i, pdf_file in enumerate(file_names):
