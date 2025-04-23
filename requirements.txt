@@ -1,7 +1,10 @@
-pypdf
-langchain
-langchain_google_genai 
-streamlit_pdf_viewer 
-langchain-community
-faiss-cpu
-pycryptodome
+pypdf==5.4.0
+langchain==0.3.24
+streamlit-pdf-viewer==0.0.22 
+langchain-community==0.3.22
+faiss-cpu==1.10.0
+pycryptodome==3.22.0
+python-dotenv==1.1.0
+langchain-google-genai==2.0.10
+google-generativeai==0.8.5
+google-genai==1.11.0
